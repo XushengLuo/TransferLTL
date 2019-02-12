@@ -1,9 +1,10 @@
 import Buchi
 from Problem import problemFormulation
 import datetime
+
 # from Biastree4MulR import tree, construction_tree
 # from collections import OrderedDict
-# import numpy as np
+import numpy as np
 # from WorkspacePlot import region_plot, path_plot, layer_plot
 # import matplotlib.pyplot as plt
 # import networkx as nx
@@ -18,6 +19,7 @@ from DetermineRoots import hoftask
 from DetectReuse import hoftask_no_simplified, detect_reuse
 from Constrees import multi_trees
 from TL_RRT_star import transfer
+from Visualization import path_plot
 
 start1 = datetime.datetime.now()
 
@@ -79,11 +81,22 @@ time3 = (datetime.datetime.now() - start3).total_seconds()
 start4 = datetime.datetime.now()
 subtask2path, starting2waypoint = detect_reuse(h_task_lib, h_task_new, end2path)
 
-path = transfer(buchi_graph, ts, no, ((0, 0), buchi_graph.graph['init'][0]), subtask2path, starting2waypoint)
+paths = transfer(buchi_graph, ts, no, ((1.0, 0), buchi_graph.graph['init'][0]), subtask2path, starting2waypoint, 150)
 time4 = (datetime.datetime.now() - start4).total_seconds()
 
 print(time1, time2, time3, time4)
-print(len(path))
+print(len(paths))
+if len(paths) > 0:
+    optpath = []
+    optcost = np.inf
+    for index in paths.keys():
+        if optcost > paths[index][0]:
+            optcost = paths[index][0]
+            optpath = paths[index][1]
+
+    path_plot(optpath, regions, obs)
+else:
+    print('couldn\' find a feasible path')
 # for key, value in subtask2path.items():
 #     print(key, value)
 #

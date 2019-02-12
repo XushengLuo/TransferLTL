@@ -109,7 +109,7 @@ def construction_tree_connect_root(transfer_tree, sample_list):
                             transfer_tree.tree.nodes[v]['cost'] = transfer_tree.tree.nodes[v]['cost'] - delta_c
 
 
-def transfer(buchi_graph, ts, no, init, subtask2path, starting2waypoint):
+def transfer(buchi_graph, ts, no, init, subtask2path, starting2waypoint, n_max):
     """
     build the tree for the new formula
     :param buchi_graph: 
@@ -122,7 +122,7 @@ def transfer(buchi_graph, ts, no, init, subtask2path, starting2waypoint):
     """
     transfer_tree = tree('', ts, buchi_graph, init, 'pre', 0.25, no)
     # print('--------------prefix path---------------------')
-    n_max = 50
+    n_max = n_max
     for n in range(n_max):
             sample_list = construction_tree(transfer_tree, buchi_graph, subtask2path, starting2waypoint)
             if sample_list:

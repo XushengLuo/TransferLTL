@@ -402,7 +402,7 @@ def multi_trees(h_task, buchi_graph, ts, no, centers):
     #     print(t.tree.nodes[t.tree.graph['init']]['label'])
     # print('--------------prefix path---------------------')
     n_max = 200
-    c = 0.2
+    c = 0
     connect = set()
     for n in range(n_max):
         # print(n)
