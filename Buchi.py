@@ -84,6 +84,7 @@ class buchi_graph(object):
                             label = label.replace('e{0}'.format(k), self.formula_comp[k])
                     # if '!' in label:
                     #     label = self.PutNotInside(label)
+                    label = label.replace('||', '|').replace('&&', '&').replace('!', '~')
                     self.buchi_graph.add_edge(state, state_dest, label=label)
 
         return self.buchi_graph

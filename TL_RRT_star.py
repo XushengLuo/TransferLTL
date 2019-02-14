@@ -1,6 +1,9 @@
 from Constrees import tree
 import numpy as np
 from networkx.algorithms import dfs_labeled_edges
+import random
+import sys
+from collections import OrderedDict
 
 
 def check_subtask(transfer_tree, parent_node, subtask2path, starting2waypoint, sample_list):
@@ -15,22 +18,81 @@ def check_subtask(transfer_tree, parent_node, subtask2path, starting2waypoint, s
     """
 
     # check whether parent node can be connected to existing subpath
-    for starting in starting2waypoint.keys(): 
-        if transfer_tree.obs_check([parent_node], starting[0], transfer_tree.label(starting[0]), 'reg')\
+    for starting in starting2waypoint.keys():
+        if np.linalg.norm(np.subtract(starting[0], parent_node[0])) < 0.2 \
+                and transfer_tree.obs_check([parent_node], starting[0], transfer_tree.label(starting[0]), 'reg')\
                 and transfer_tree.checkTranB(parent_node[1], transfer_tree.tree.nodes[parent_node]['label'], starting[1]):
-            for subtask in starting2waypoint[starting]:
+            # keep track of the subpath that has been added to the tree, avoid repeating
+            # future work, connect added node to the first state of a subpath
+            if starting in transfer_tree.used:
+                a = (parent_node, starting)
+                sample_list.append(a)
+                continue
+            else:
+                transfer_tree.used.add(starting)
+                # print(len(trans er_tree.used))
+                for subtask in starting2waypoint[starting]:
+                    a = subtask2path[subtask].copy()
+                    a.insert(0, parent_node)
+                    sample_list.append(a)
+                    # combine elemental subtask to larger one
+                    sweep_subtask(sample_list, starting2waypoint, subtask2path, transfer_tree)
+
+
+def sweep_subtask(sample_list, starting2waypoint, subtask2path, transfer_tree):
+    """
+    comnine subtask to construct complex subtask
+    :param sample_list:
+    :param starting2waypoint:
+    :param subtask2path:
+    :param transfer_tree:
+    :return:
+    """
+    for sample in sample_list:
+        ending = sample[-1]
+        if ending in starting2waypoint.keys() and ending not in transfer_tree.used:
+            for subtask in starting2waypoint[ending]:
                 a = subtask2path[subtask].copy()
-                a.insert(0, parent_node)
+                a.insert(0, sample[-2])
                 sample_list.append(a)
 
 
-def construction_tree(transfer_tree, buchi_graph, subtask2path, starting2waypoint):
+def findpath(transfer_tree, goals):
+    """
+    find the path backwards
+    :param goal: goal state
+    :return: dict path : cost
+    """
+    paths = OrderedDict()
+    for i in range(len(goals)):
+        true_goal = goals[i]
+        # true_goal = list(transfer_tree.tree.pred[goal].keys())[0]
+        path = [true_goal]
+        s = true_goal
+        while s != transfer_tree.init:
+            s = list(transfer_tree.tree.pred[s].keys())[0]
+            if s == path[0]:
+                print("loop")
+            path.insert(0, s)
+
+        if transfer_tree.seg == 'pre':
+            paths[i] = [transfer_tree.tree.nodes[true_goal]['cost'], path]
+        elif transfer_tree.seg == 'suf':
+            # path.append(self.init)
+            paths[i] = [
+                transfer_tree.tree.nodes[goal]['cost'] + np.linalg.norm(np.subtract(goal[0], transfer_tree.init[0])),
+                path]
+    return paths
+
+
+def construction_tree(transfer_tree, buchi_graph, subtask2path, starting2waypoint, uniform):
     """
     constructe the tree in the normal way
     :param transfer_tree: 
     :param buchi_graph: 
     :param subtask2path: 
-    :param starting2waypoint: 
+    :param starting2waypoint:
+    :param uniform
     :return: 
     """
     # sample
@@ -72,7 +134,8 @@ def construction_tree(transfer_tree, buchi_graph, subtask2path, starting2waypoin
                 transfer_tree.goals.append(q_new)
             transfer_tree.rewire(q_new, near_v, obs_check)
             # subpath that can be connected via q_new
-            check_subtask(transfer_tree, q_new, subtask2path, starting2waypoint, sample_list)
+            if uniform and random.uniform(0, 1) <= 1:  # float(sys.argv[1]):
+                check_subtask(transfer_tree, q_new, subtask2path, starting2waypoint, sample_list)
 
     return sample_list
 
@@ -109,7 +172,7 @@ def construction_tree_connect_root(transfer_tree, sample_list):
                             transfer_tree.tree.nodes[v]['cost'] = transfer_tree.tree.nodes[v]['cost'] - delta_c
 
 
-def transfer(buchi_graph, ts, no, init, subtask2path, starting2waypoint, n_max):
+def transfer(buchi_graph, ts, no, init, subtask2path, starting2waypoint, n_max, uniform):
     """
     build the tree for the new formula
     :param buchi_graph: 
@@ -117,17 +180,27 @@ def transfer(buchi_graph, ts, no, init, subtask2path, starting2waypoint, n_max):
     :param no: 
     :param init: 
     :param subtask2path: 
-    :param starting2waypoint: 
+    :param starting2waypoint:
+    :param n_max
+    :param uniform
     :return: 
     """
     transfer_tree = tree('', ts, buchi_graph, init, 'pre', 0.25, no)
     # print('--------------prefix path---------------------')
     n_max = n_max
-    for n in range(n_max):
-            sample_list = construction_tree(transfer_tree, buchi_graph, subtask2path, starting2waypoint)
-            if sample_list:
+    # track = 0
+    # for n in range(n_max):
+    while 1:
+            sample_list = construction_tree(transfer_tree, buchi_graph, subtask2path, starting2waypoint, uniform)
+            if sample_list and uniform:
+                # track += 1
+                # print(track)
                 for i in range(len(sample_list)):
+                    # print(sample_list[i])
                     construction_tree_connect_root(transfer_tree, sample_list[i])
-
-    path = transfer_tree.findpath(transfer_tree.goals)
-    return path
+            if transfer_tree.tree.number_of_nodes() > 2000:
+                break
+            # if len(transfer_tree.goals) > 0:
+            #     break
+    path = findpath(transfer_tree, transfer_tree.goals)
+    return path, transfer_tree.tree.number_of_nodes()

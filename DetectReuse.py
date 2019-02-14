@@ -1,7 +1,7 @@
 from sympy import satisfiable
 from networkx.classes.digraph import DiGraph
 from sympy.logic.boolalg import to_dnf
-from sympy.logic.boolalg import Not, And
+from sympy.logic.boolalg import Not, And, Equivalent
 from state import State
 from DetermineRoots import target
 
@@ -71,6 +71,8 @@ def inclusion(subtask_lib, subtask_new):
     """
     # if subtask_new[0].q == 'T2_S3':
     #     print('hi')
+    # if Equivalent(subtask_lib[0].label, subtask_new[0].label):
+    #     print(subtask_lib[0].label, subtask_new[0].label)
     # A included in B <=> does no exist a truth assignment such that  (A & not B) is true
     if not satisfiable(And(subtask_lib[0].label, Not(subtask_new[0].label))):
         if subtask_lib[0].x == subtask_new[0].x and subtask_lib[1].x == subtask_new[1].x:
@@ -93,8 +95,8 @@ def replace(init_q, end_q, init_lib_q, end_lib_q, path, direction):
     :return:
     """
 
-    if init_lib_q != path[0][1] or end_lib_q != path[-1][1]:
-        print('error')
+    assert init_lib_q == path[0][1], 'match error'
+    assert end_lib_q == path[-1][1], 'match error'
 
     repath = []
     if direction == 'f':
@@ -128,19 +130,24 @@ def detect_reuse(h_task_lib, h_task_new, end2path):
     for subtask_new in h_task_new.edges:
         # match edges in library of h_task
         for subtask_lib in h_task_lib.edges:
+            # future work: it's better to compare the lib of controller
+            if subtask_lib not in end2path.keys():
+                continue
             direction = inclusion(subtask_lib, subtask_new)
             if direction == 'forward':
                 subtask2path[((subtask_new[0].x, subtask_new[0].q), (subtask_new[1].x, subtask_new[1].q))] \
-                    = replace(subtask_new[0].q, subtask_new[1].q, subtask_lib[0].q, subtask_lib[1].q, end2path[subtask_lib], 'f')
+                        = replace(subtask_new[0].q, subtask_new[1].q, subtask_lib[0].q, subtask_lib[1].q, end2path[subtask_lib], 'f')
+                break
             elif direction == 'backward':
                 subtask2path[((subtask_new[0].x, subtask_new[0].q), (subtask_new[1].x, subtask_new[1].q))] \
                     = replace(subtask_new[0].q, subtask_new[1].q, subtask_lib[0].q, subtask_lib[1].q, end2path[subtask_lib], 'b')
+                break
 
     # starting point : subtask starting from starting point
     starting2waypoint = {key[0]: [] for key, _ in subtask2path.items()}
     for key, _ in subtask2path.items():
         starting2waypoint[key[0]].append(key)
-    # accepting state
+    # including accepting state
     for node in h_task_new.nodes:
         if 'accept' in node.q and (node.x, node.q) not in starting2waypoint.keys():
             starting2waypoint[(node.x, node.q)] = []

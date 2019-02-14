@@ -48,6 +48,8 @@ class tree(object):
         # region that has ! preceding it
         self.no = no
 
+        self.used = set()
+
     def sample(self):
         """
         sample point from the workspace
@@ -391,7 +393,7 @@ def construction_tree_connect_root(subtree, q_new, label, centers, h_task, conne
                 connect.add((curr, sc))
 
 
-def multi_trees(h_task, buchi_graph, ts, no, centers):
+def multi_trees(h_task, buchi_graph, ts, no, centers, n_max):
     multi_tree = list()
     # a list of subtrees
     for root in h_task.nodes:
@@ -401,7 +403,7 @@ def multi_trees(h_task, buchi_graph, ts, no, centers):
     # for t in multi_tree:
     #     print(t.tree.nodes[t.tree.graph['init']]['label'])
     # print('--------------prefix path---------------------')
-    n_max = 200
+    n_max = n_max
     c = 0
     connect = set()
     for n in range(n_max):

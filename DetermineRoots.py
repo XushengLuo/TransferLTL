@@ -104,5 +104,3 @@ def hoftask(init, buchi_graph, regions):
     #     print(x)
     return h_task
 
-
-
