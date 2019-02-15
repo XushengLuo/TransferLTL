@@ -43,7 +43,11 @@ class tree(object):
         label = self.label(init[0])
         if label != '':
             label = label + '_' + str(1)
-        self.tree.add_node(init, cost=0, label=label)
+        # accepting state before current node
+        acc = []
+        if 'accept' in init[1]:
+            acc = acc.append(init)
+        self.tree.add_node(init, cost=0, label=label, acc=acc)
 
         # region that has ! preceding it
         self.no = no
@@ -93,6 +97,22 @@ class tree(object):
             return tuple(np.asarray(x_nearest) + self.step_size *
                          (np.subtract(x_rand, x_nearest))/np.linalg.norm(np.subtract(x_rand, x_nearest)))
 
+    def acpt_check(self, q_min, q_new, label_new):
+        """
+        check the accepting state in the patg leading to q_new
+        :param q_min:
+        :param q_new:
+        :return:
+        """
+        acc = self.tree.nodes[q_min]['acc'].copy()
+        if 'accept' in q_new[1]:
+            acc.append(q_new)
+        for ac in acc:
+            if self.obs_check([q_new], ac[0], self.tree.nodes[ac]['label'], 'reg')\
+                    and self.checkTranB(q_new[1], label_new, ac[1]):
+                self.goals.append((q_new, ac))
+        return acc
+
     def extend(self, q_new, near_v, label, obs_check):
         """
         :param: q_new: new state form: tuple (mulp, buchi)
@@ -113,7 +133,7 @@ class tree(object):
                     q_min = near_vertex
                     cost = c
         if added == 1:
-            self.tree.add_node(q_new, cost=cost, label=label)
+            self.tree.add_node(q_new, cost=cost, label=label, acc=self.acpt_check(q_min, q_new, label))
             self.tree.add_edge(q_min, q_new)
             # if self.seg == 'pre' and q_new[1] in self.acpt:
             #     q_n = list(list(self.tree.pred[q_new].keys())[0])
@@ -387,7 +407,7 @@ def construction_tree_connect_root(subtree, q_new, label, centers, h_task, conne
                 c = subtree.tree.nodes[q_new]['cost'] + \
                             np.linalg.norm(np.subtract(q_new[0], succ[0]))
 
-                subtree.tree.add_node(succ, cost=c, label=label_succ)
+                subtree.tree.add_node(succ, cost=c, label=label_succ, acc=subtree.acpt_check(q_new, succ, label_succ))
                 subtree.tree.add_edge(q_new, succ)
                 # keep track of connection
                 connect.add((curr, sc))

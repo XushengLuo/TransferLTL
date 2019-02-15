@@ -148,7 +148,7 @@ def detect_reuse(h_task_lib, h_task_new, end2path):
     for key, _ in subtask2path.items():
         starting2waypoint[key[0]].append(key)
     # including accepting state
-    for node in h_task_new.nodes:
-        if 'accept' in node.q and (node.x, node.q) not in starting2waypoint.keys():
-            starting2waypoint[(node.x, node.q)] = []
+    # for node in h_task_new.nodes:
+    #     if 'accept' in node.q and (node.x, node.q) not in starting2waypoint.keys():
+    #         starting2waypoint[(node.x, node.q)] = []
     return subtask2path, starting2waypoint
