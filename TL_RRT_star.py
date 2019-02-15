@@ -19,8 +19,8 @@ def check_subtask(transfer_tree, parent_node, subtask2path, starting2waypoint, s
 
     # check whether parent node can be connected to existing subpath
     for starting in starting2waypoint.keys():
-        if np.linalg.norm(np.subtract(starting[0], parent_node[0])) < 0.2 \
-                and transfer_tree.obs_check([parent_node], starting[0], transfer_tree.label(starting[0]), 'reg')\
+        if np.linalg.norm(np.subtract(starting[0], parent_node[0])) < 1 \
+                and list(transfer_tree.obs_check([parent_node], starting[0], transfer_tree.label(starting[0]), 'reg').values())[0] \
                 and transfer_tree.checkTranB(parent_node[1], transfer_tree.tree.nodes[parent_node]['label'], starting[1]):
             # keep track of the subpath that has been added to the tree, avoid repeating
             # future work, connect added node to the first state of a subpath
@@ -36,7 +36,7 @@ def check_subtask(transfer_tree, parent_node, subtask2path, starting2waypoint, s
                     a.insert(0, parent_node)
                     sample_list.append(a)
                     # combine elemental subtask to larger one
-                    sweep_subtask(sample_list, starting2waypoint, subtask2path, transfer_tree)
+                    # sweep_subtask(sample_list, starting2waypoint, subtask2path, transfer_tree)
 
 
 def sweep_subtask(sample_list, starting2waypoint, subtask2path, transfer_tree):
@@ -60,12 +60,13 @@ def sweep_subtask(sample_list, starting2waypoint, subtask2path, transfer_tree):
 def findpath(transfer_tree, goals):
     """
     find the path backwards
-    :param goal: goal state
+    :param transfer_tree
+    :param goals: goal state
     :return: dict path : cost
     """
     paths = OrderedDict()
     for i in range(len(goals)):
-        true_goal = goals[i]
+        true_goal = goals[i][0]
         # true_goal = list(transfer_tree.tree.pred[goal].keys())[0]
         path = [true_goal]
         s = true_goal
@@ -75,13 +76,24 @@ def findpath(transfer_tree, goals):
                 print("loop")
             path.insert(0, s)
 
+        s = goals[i][2]  # accepting point
+        suf_path = []  # joint point
+        while s != goals[i][1]:
+            try:
+                s = list(transfer_tree.tree.pred[s].keys())[0]
+                suf_path.insert(0, s)
+            except IndexError:
+                break
+
+        path = path + suf_path
         if transfer_tree.seg == 'pre':
-            paths[i] = [transfer_tree.tree.nodes[true_goal]['cost'], path]
-        elif transfer_tree.seg == 'suf':
-            # path.append(self.init)
-            paths[i] = [
-                transfer_tree.tree.nodes[goal]['cost'] + np.linalg.norm(np.subtract(goal[0], transfer_tree.init[0])),
-                path]
+            paths[i] = [transfer_tree.tree.nodes[true_goal]['cost'] + np.linalg.norm(np.subtract(goals[i][0][0], goals[i][1][0])) + \
+                    transfer_tree.tree.nodes[goals[i][2]]['cost'] - transfer_tree.tree.nodes[goals[i][1]]['cost'], path]
+        # elif transfer_tree.seg == 'suf':
+        #     path.append(self.init)
+            # paths[i] = [
+            #     transfer_tree.tree.nodes[true_goal]['cost'] + np.linalg.norm(np.subtract(true_goal[0], transfer_tree.init[0])),
+            #     path]
     return paths
 
 
@@ -130,8 +142,8 @@ def construction_tree(transfer_tree, buchi_graph, subtask2path, starting2waypoin
         
         # rewire
         if added:
-            if 'accept' in q_new[1]:
-                transfer_tree.goals.append(q_new)
+            # if 'accept' in q_new[1]:
+            #     transfer_tree.goals.append(q_new)
             transfer_tree.rewire(q_new, near_v, obs_check)
             # subpath that can be connected via q_new
             if uniform and random.uniform(0, 1) <= 1:  # float(sys.argv[1]):
@@ -154,10 +166,13 @@ def construction_tree_connect_root(transfer_tree, sample_list):
         cost = transfer_tree.tree.nodes[sample_list[k - 1]]['cost'] + \
             np.linalg.norm(np.subtract(sample_list[k - 1][0], cand[0]))
         if cand not in transfer_tree.tree.nodes:
-            if 'accept' in cand[1]:
-                transfer_tree.goals.append(cand)
-            transfer_tree.tree.add_node(cand, cost=cost, label=transfer_tree.label(cand[0]))
+            # if 'accept' in cand[1]:
+            #     transfer_tree.goals.append(cand)
+            label_cand = transfer_tree.label(cand[0])
+            transfer_tree.tree.add_node(cand, cost=cost, label=label_cand)
+            transfer_tree.tree.nodes[cand]['acc'] = transfer_tree.acpt_check(sample_list[k-1], cand, label_cand)
             transfer_tree.tree.add_edge(sample_list[k-1], cand)
+            transfer_tree.search_goal(cand, label_cand, transfer_tree.tree.nodes[cand]['acc'])
         else:
                 delta_c = transfer_tree.tree.nodes[cand]['cost'] - cost
                 # update the cost of node in the transfer_tree rooted at sample_list[k]
@@ -166,10 +181,15 @@ def construction_tree_connect_root(transfer_tree, sample_list):
                         print('empty')
                     transfer_tree.tree.remove_edge(list(transfer_tree.tree.pred[cand].keys())[0], cand)
                     transfer_tree.tree.add_edge(sample_list[k-1], cand)
+                    transfer_tree.tree.nodes[cand]['acc'] = transfer_tree.acpt_check(sample_list[k-1], cand,
+                                                                        transfer_tree.tree.nodes[cand]['label'])
                     edges = dfs_labeled_edges(transfer_tree.tree, source=cand)
                     for _, v, d in edges:
                         if d == 'forward':
+                            # update cost
                             transfer_tree.tree.nodes[v]['cost'] = transfer_tree.tree.nodes[v]['cost'] - delta_c
+                            # update accept state
+                            transfer_tree.tree.nodes[v]['acc'] = transfer_tree.tree.nodes[cand]['acc'][:]  # copy
 
 
 def transfer(buchi_graph, ts, no, init, subtask2path, starting2waypoint, n_max, uniform):
@@ -188,19 +208,18 @@ def transfer(buchi_graph, ts, no, init, subtask2path, starting2waypoint, n_max, 
     transfer_tree = tree('', ts, buchi_graph, init, 'pre', 0.25, no)
     # print('--------------prefix path---------------------')
     n_max = n_max
-    # track = 0
     # for n in range(n_max):
     while 1:
             sample_list = construction_tree(transfer_tree, buchi_graph, subtask2path, starting2waypoint, uniform)
             if sample_list and uniform:
-                # track += 1
-                # print(track)
                 for i in range(len(sample_list)):
                     # print(sample_list[i])
                     construction_tree_connect_root(transfer_tree, sample_list[i])
-            if transfer_tree.tree.number_of_nodes() > 2000:
+            # print(transfer_tree.tree.number_of_nodes())
+            if transfer_tree.tree.number_of_nodes() > 10000:
                 break
             # if len(transfer_tree.goals) > 0:
+            #     print(len(transfer_tree.goals))
             #     break
     path = findpath(transfer_tree, transfer_tree.goals)
     return path, transfer_tree.tree.number_of_nodes()

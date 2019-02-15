@@ -2,8 +2,11 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="7ae19a4f-7b3c-4d75-821a-e8dd66974147" name="Default" comment="">
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/path.png" afterPath="$PROJECT_DIR$/path.png" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Constrees.py" afterPath="$PROJECT_DIR$/Constrees.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/DetectReuse.py" afterPath="$PROJECT_DIR$/DetectReuse.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Problem.py" afterPath="$PROJECT_DIR$/Problem.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/TL_RRT_star.py" afterPath="$PROJECT_DIR$/TL_RRT_star.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/TransferLTL.py" afterPath="$PROJECT_DIR$/TransferLTL.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -14,18 +17,6 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="Problem.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Problem.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="255">
-              <caret line="190" column="29" lean-forward="false" selection-start-line="190" selection-start-column="29" selection-end-line="190" selection-end-column="29" />
-              <folding>
-                <element signature="e#75#118#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file leaf-file-name="stats.md" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/data/stats.md">
           <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
@@ -42,22 +33,10 @@
       <file leaf-file-name="TransferLTL.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/TransferLTL.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="57">
-              <caret line="90" column="23" lean-forward="true" selection-start-line="90" selection-start-column="23" selection-end-line="90" selection-end-column="23" />
+            <state relative-caret-position="227">
+              <caret line="137" column="33" lean-forward="true" selection-start-line="137" selection-start-column="33" selection-end-line="137" selection-end-column="33" />
               <folding>
                 <element signature="e#0#12#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Visualization.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Visualization.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="114">
-              <caret line="44" column="10" lean-forward="false" selection-start-line="44" selection-start-column="10" selection-end-line="44" selection-end-column="10" />
-              <folding>
-                <element signature="e#0#31#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -66,8 +45,8 @@
       <file leaf-file-name="DetectReuse.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/DetectReuse.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="2004">
-              <caret line="147" column="39" lean-forward="true" selection-start-line="147" selection-start-column="39" selection-end-line="147" selection-end-column="39" />
+            <state relative-caret-position="-1530">
+              <caret line="27" column="27" lean-forward="true" selection-start-line="27" selection-start-column="27" selection-end-line="27" selection-end-column="27" />
               <folding>
                 <element signature="e#0#29#0" expanded="true" />
               </folding>
@@ -78,7 +57,7 @@
       <file leaf-file-name="DetermineRoots.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/DetermineRoots.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="555">
+            <state relative-caret-position="-660">
               <caret line="37" column="18" lean-forward="true" selection-start-line="37" selection-start-column="18" selection-end-line="37" selection-end-column="18" />
               <folding>
                 <element signature="e#75#104#0" expanded="true" />
@@ -87,28 +66,25 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Buchi.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Buchi.py">
+      <file leaf-file-name="TL_RRT_star.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/TL_RRT_star.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="3180">
-              <caret line="320" column="56" lean-forward="true" selection-start-line="320" selection-start-column="56" selection-end-line="320" selection-end-column="56" />
+            <state relative-caret-position="-2565">
+              <caret line="28" column="37" lean-forward="true" selection-start-line="28" selection-start-column="37" selection-end-line="28" selection-end-column="37" />
               <folding>
-                <element signature="e#25#42#0" expanded="true" />
-                <element signature="e#3436#4920#0" expanded="false" />
-                <element signature="e#4969#5552#0" expanded="false" />
-                <element signature="e#5611#7815#0" expanded="false" />
+                <element signature="e#0#26#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="TL_RRT_star.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/TL_RRT_star.py">
+      <file leaf-file-name="Problem.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Problem.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="296">
-              <caret line="23" column="122" lean-forward="true" selection-start-line="22" selection-start-column="20" selection-end-line="23" selection-end-column="122" />
+            <state relative-caret-position="-1713">
+              <caret line="205" column="0" lean-forward="true" selection-start-line="205" selection-start-column="0" selection-end-line="205" selection-end-column="0" />
               <folding>
-                <element signature="e#0#26#0" expanded="true" />
+                <element signature="e#75#118#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -117,24 +93,12 @@
       <file leaf-file-name="Constrees.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/Constrees.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="84">
-              <caret line="122" column="17" lean-forward="true" selection-start-line="122" selection-start-column="17" selection-end-line="122" selection-end-column="17" />
+            <state relative-caret-position="-5700">
+              <caret line="50" column="19" lean-forward="false" selection-start-line="50" selection-start-column="13" selection-end-line="50" selection-end-column="19" />
               <folding>
                 <element signature="e#156#182#0" expanded="true" />
-                <element signature="e#9636#10243#0" expanded="false" />
-                <element signature="e#10302#10948#0" expanded="false" />
-                <element signature="e#11819#12283#0" expanded="false" />
+                <element signature="e#11547#12193#0" expanded="false" />
               </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="state.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/state.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="45">
-              <caret line="3" column="7" lean-forward="true" selection-start-line="3" selection-start-column="7" selection-end-line="3" selection-end-column="7" />
-              <folding />
             </state>
           </provider>
         </entry>
@@ -143,36 +107,36 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>str</find>
-      <find>execLtl2ba</find>
-      <find>add_edge</find>
-      <find>dnf</find>
-      <find>self.acpt</find>
-      <find>['label']</find>
-      <find>T2_S10</find>
-      <find>T4_S17</find>
-      <find>T4_S11</find>
-      <find>multi</find>
-      <find>extend_rewire</find>
-      <find>items</find>
-      <find>starti</find>
       <find>self.n</find>
       <find>inclus</find>
       <find>replace</find>
       <find>ratio</find>
       <find>time3</find>
       <find>err</find>
-      <find>print</find>
       <find>find</find>
-      <find>satisfiable</find>
       <find>reus</find>
-      <find>init</find>
-      <find>.no</find>
-      <find>inclusion</find>
       <find>swee</find>
       <find>self.goal</find>
+      <find>.add_node</find>
+      <find>.goals</find>
+      <find>.copy</find>
       <find>copy</find>
+      <find>append</find>
+      <find>init</find>
+      <find>acpt</find>
+      <find>print</find>
+      <find>rewire</find>
       <find>add_node</find>
+      <find>satisfiable</find>
+      <find>sear</find>
+      <find>extend_rewire</find>
+      <find>obs_check</find>
+      <find>acpt_c</find>
+      <find>search</find>
+      <find>search_g</find>
+      <find>init_state</find>
+      <find>inclusion</find>
+      <find>.no</find>
     </findStrings>
     <replaceStrings>
       <replace>transfer_tree</replace>
@@ -193,11 +157,11 @@
         <option value="$PROJECT_DIR$/Buchi.py" />
         <option value="$PROJECT_DIR$/DetermineRoots.py" />
         <option value="$PROJECT_DIR$/data/stats.md" />
-        <option value="$PROJECT_DIR$/TL_RRT_star.py" />
-        <option value="$PROJECT_DIR$/TransferLTL.py" />
-        <option value="$PROJECT_DIR$/Problem.py" />
         <option value="$PROJECT_DIR$/DetectReuse.py" />
         <option value="$PROJECT_DIR$/Constrees.py" />
+        <option value="$PROJECT_DIR$/Problem.py" />
+        <option value="$PROJECT_DIR$/TransferLTL.py" />
+        <option value="$PROJECT_DIR$/TL_RRT_star.py" />
       </list>
     </option>
   </component>
@@ -372,11 +336,11 @@
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3292683" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="true" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.329602" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.329602" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.29975125" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.29975125" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.30597016" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="true" content_ui="tabs" />
       <window_info id="Data View" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
@@ -420,7 +384,7 @@
           </properties>
         </breakpoint>
       </default-breakpoints>
-      <option name="time" value="160" />
+      <option name="time" value="191" />
     </breakpoint-manager>
     <watches-manager />
   </component>
@@ -457,14 +421,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file:///usr/local/Cellar/python3/3.6.3/Frameworks/Python.framework/Versions/3.6/lib/python3.6/site-packages/networkx/classes/reportviews.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="177">
-          <caret line="929" column="0" lean-forward="false" selection-start-line="929" selection-start-column="0" selection-end-line="929" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$USER_HOME$/Library/Caches/PyCharmCE2017.2/python_stubs/-1604679571/builtins.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="252">
@@ -493,14 +449,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="219">
           <caret line="115" column="8" lean-forward="false" selection-start-line="115" selection-start-column="8" selection-end-line="115" selection-end-column="8" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file:///usr/local/Cellar/python3/3.6.3/Frameworks/Python.framework/Versions/3.6/lib/python3.6/codecs.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="126">
-          <caret line="308" column="0" lean-forward="false" selection-start-line="308" selection-start-column="0" selection-end-line="308" selection-end-column="0" />
           <folding />
         </state>
       </provider>
@@ -568,12 +516,36 @@
         </state>
       </provider>
     </entry>
+    <entry file="file:///usr/local/Cellar/python3/3.6.3/Frameworks/Python.framework/Versions/3.6/lib/python3.6/site-packages/networkx/classes/reportviews.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="177">
+          <caret line="177" column="0" lean-forward="false" selection-start-line="177" selection-start-column="0" selection-end-line="177" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/state.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="45">
+          <caret line="3" column="7" lean-forward="true" selection-start-line="3" selection-start-column="7" selection-end-line="3" selection-end-column="7" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///usr/local/Cellar/python3/3.6.3/Frameworks/Python.framework/Versions/3.6/lib/python3.6/codecs.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="156">
+          <caret line="310" column="0" lean-forward="false" selection-start-line="310" selection-start-column="0" selection-end-line="310" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/Buchi.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3180">
-          <caret line="320" column="56" lean-forward="true" selection-start-line="320" selection-start-column="56" selection-end-line="320" selection-end-column="56" />
+        <state relative-caret-position="184">
+          <caret line="306" column="30" lean-forward="true" selection-start-line="306" selection-start-column="30" selection-end-line="306" selection-end-column="30" />
           <folding>
-            <element signature="e#25#42#0" expanded="true" />
+            <element signature="e#25#42#0" expanded="false" />
             <element signature="e#3436#4920#0" expanded="false" />
             <element signature="e#4969#5552#0" expanded="false" />
             <element signature="e#5611#7815#0" expanded="false" />
@@ -592,29 +564,29 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Problem.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="255">
-          <caret line="190" column="29" lean-forward="false" selection-start-line="190" selection-start-column="29" selection-end-line="190" selection-end-column="29" />
-          <folding>
-            <element signature="e#75#118#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/TransferLTL.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="57">
-          <caret line="90" column="23" lean-forward="true" selection-start-line="90" selection-start-column="23" selection-end-line="90" selection-end-column="23" />
+        <state relative-caret-position="227">
+          <caret line="137" column="33" lean-forward="true" selection-start-line="137" selection-start-column="33" selection-end-line="137" selection-end-column="33" />
           <folding>
             <element signature="e#0#12#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/DetectReuse.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-1530">
+          <caret line="27" column="27" lean-forward="true" selection-start-line="27" selection-start-column="27" selection-end-line="27" selection-end-column="27" />
+          <folding>
+            <element signature="e#0#29#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/DetermineRoots.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="555">
+        <state relative-caret-position="-660">
           <caret line="37" column="18" lean-forward="true" selection-start-line="37" selection-start-column="18" selection-end-line="37" selection-end-column="18" />
           <folding>
             <element signature="e#75#104#0" expanded="true" />
@@ -622,43 +594,33 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/DetectReuse.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2004">
-          <caret line="147" column="39" lean-forward="true" selection-start-line="147" selection-start-column="39" selection-end-line="147" selection-end-column="39" />
-          <folding>
-            <element signature="e#0#29#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/state.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="45">
-          <caret line="3" column="7" lean-forward="true" selection-start-line="3" selection-start-column="7" selection-end-line="3" selection-end-column="7" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/TL_RRT_star.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="296">
-          <caret line="23" column="122" lean-forward="true" selection-start-line="22" selection-start-column="20" selection-end-line="23" selection-end-column="122" />
+        <state relative-caret-position="-2565">
+          <caret line="28" column="37" lean-forward="true" selection-start-line="28" selection-start-column="37" selection-end-line="28" selection-end-column="37" />
           <folding>
             <element signature="e#0#26#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/Problem.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-1713">
+          <caret line="205" column="0" lean-forward="true" selection-start-line="205" selection-start-column="0" selection-end-line="205" selection-end-column="0" />
+          <folding>
+            <element signature="e#75#118#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/Constrees.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="84">
-          <caret line="122" column="17" lean-forward="true" selection-start-line="122" selection-start-column="17" selection-end-line="122" selection-end-column="17" />
+        <state relative-caret-position="-5700">
+          <caret line="50" column="19" lean-forward="false" selection-start-line="50" selection-start-column="13" selection-end-line="50" selection-end-column="19" />
           <folding>
             <element signature="e#156#182#0" expanded="true" />
-            <element signature="e#9636#10243#0" expanded="false" />
-            <element signature="e#10302#10948#0" expanded="false" />
-            <element signature="e#11819#12283#0" expanded="false" />
+            <element signature="e#11547#12193#0" expanded="false" />
           </folding>
         </state>
       </provider>

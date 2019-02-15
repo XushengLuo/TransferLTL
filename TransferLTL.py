@@ -137,10 +137,15 @@ for k in range(10):
         #       'number of nodes     :', nn_tranfer)
         # path_plot(optpath, regions, obs)
 
+    if len(optpath_transfer) > 0:
+        path_plot(optpath_transfer, regions, obs)
+
     start5 = datetime.datetime.now()
     paths, nn = transfer(buchi_graph, ts, no, (init_pos, buchi_graph.graph['init'][0]), dict(), dict(),
                          n_max, False)
     time5 = (datetime.datetime.now() - start5).total_seconds()
+
+
 
     optpath = []
     optcost = np.inf
@@ -154,9 +159,6 @@ for k in range(10):
         #       'optimal cost        :', optcost, '\n',
         #       'number of nodes     :', nn)
         # print('-----------------------------')
-
-
-
 
     print('==============================================')
     print('time for new formula   :  %8.2f | %8.2f' % (time4_transfer, time5))
@@ -173,10 +175,8 @@ for k in range(10):
     number_of_nodes.insert(k, nn_tranfer)
     number_of_nodes.append(nn)
 
-    # if len(optpath_transfer) > 0:
-    #     path_plot(optpath_transfer, regions, obs)
-    if len(optpath) > 0:
-        path_plot(optpath, regions, obs)
+    # if len(optpath) > 0:
+    #     path_plot(optpath, regions, obs)
 
 # check wheter a subpath is added to the tree more than once
 print(time_for_new_formula)

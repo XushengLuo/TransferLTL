@@ -46,9 +46,9 @@ class tree(object):
         # accepting state before current node
         acc = []
         if 'accept' in init[1]:
-            acc = acc.append(init)
+            acc.append(init)
         self.tree.add_node(init, cost=0, label=label, acc=acc)
-
+        self.search_goal(init, label, acc)
         # region that has ! preceding it
         self.no = no
 
@@ -102,16 +102,33 @@ class tree(object):
         check the accepting state in the patg leading to q_new
         :param q_min:
         :param q_new:
+        :param label_new:
         :return:
         """
-        acc = self.tree.nodes[q_min]['acc'].copy()
+        acc = self.tree.nodes[q_min]['acc'][:]  # copy
         if 'accept' in q_new[1]:
             acc.append(q_new)
-        for ac in acc:
-            if self.obs_check([q_new], ac[0], self.tree.nodes[ac]['label'], 'reg')\
-                    and self.checkTranB(q_new[1], label_new, ac[1]):
-                self.goals.append((q_new, ac))
         return acc
+
+    def search_goal(self, q_new, label_new, acc):
+        """
+        whether q_new can connect to point before acc
+        :param q_new:
+        :param label_new:
+        :param acc:
+        :return:
+        """
+        for ac in acc:
+            # connect to path leading to accepting state
+            path = self.findpath([ac])[0][1]
+            for point in path:
+                if list(self.obs_check([q_new], point[0], self.tree.nodes[point]['label'], 'reg').values())[0] \
+                        and self.checkTranB(q_new[1], label_new, point[1]):
+                    self.goals.append((q_new, point, ac))  # endpoint, middle point, accepting point
+            # connect to accepting state
+            if list(self.obs_check([q_new], ac[0], self.tree.nodes[ac]['label'], 'reg').values())[0] \
+                    and self.checkTranB(q_new[1], label_new, ac[1]):
+                self.goals.append((q_new, ac, ac))
 
     def extend(self, q_new, near_v, label, obs_check):
         """
@@ -133,8 +150,10 @@ class tree(object):
                     q_min = near_vertex
                     cost = c
         if added == 1:
-            self.tree.add_node(q_new, cost=cost, label=label, acc=self.acpt_check(q_min, q_new, label))
+            self.tree.add_node(q_new, cost=cost, label=label)
+            self.tree.nodes[q_new]['acc'] = self.acpt_check(q_min, q_new, label)
             self.tree.add_edge(q_min, q_new)
+            self.search_goal(q_new, label, self.tree.nodes[q_new]['acc'])
             # if self.seg == 'pre' and q_new[1] in self.acpt:
             #     q_n = list(list(self.tree.pred[q_new].keys())[0])
             #     cost = self.tree.nodes[tuple(q_n)]['cost']
@@ -174,9 +193,13 @@ class tree(object):
                     self.tree.remove_edge(list(self.tree.pred[near_vertex].keys())[0], near_vertex)
                     self.tree.add_edge(q_new, near_vertex)
                     edges = dfs_labeled_edges(self.tree, source=near_vertex)
+                    self.tree.nodes[near_vertex]['acc'] = self.acpt_check(q_new, near_vertex,
+                                                            self.tree.nodes[near_vertex]['label'])
                     for _, v, d in edges:
                         if d == 'forward':
                             self.tree.nodes[v]['cost'] = self.tree.nodes[v]['cost'] - delta_c
+                            self.tree.nodes[v]['acc'] = self.tree.nodes[near_vertex]['acc'][:]  # copy
+        # better to research the goal but abandon the implementation
 
     def near(self, x_new):
         """
@@ -289,7 +312,7 @@ class tree(object):
     def findpath(self, goals):
         """
         find the path backwards
-        :param goal: goal state
+        :param goals: goal state
         :return: dict path : cost
         """
         paths = OrderedDict()
@@ -303,33 +326,29 @@ class tree(object):
                     print("loop")
                 path.insert(0, s)
 
-            if self.seg == 'pre':
-                paths[i] = [self.tree.nodes[goal]['cost'], path]
-            elif self.seg == 'suf':
-                # path.append(self.init)
-                paths[i] = [self.tree.nodes[goal]['cost'] + np.linalg.norm(np.subtract(goal[0], self.init[0])), path]
+            paths[i] = [self.tree.nodes[goal]['cost'], path]
         return paths
 
 
-def extend_rewire(subtree, x_new, near_v, label, buchi_graph):
-
-    # check obstacle free
-    obs_check = subtree.obs_check(near_v, x_new, label, 'reg')
-
-    # iterate over each buchi state
-    for b_state in buchi_graph.nodes:
-
-        # new product state
-        q_new = (x_new, b_state)
-
-        # extend
-        added = subtree.extend(q_new, near_v, label, obs_check)
-        # rewire
-        if added == 1:
-            subtree.rewire(q_new, near_v, obs_check)
-
-    # number of nodes
-    # sz.append(tree.tree.number_of_nodes())
+# def extend_rewire(subtree, x_new, near_v, label, buchi_graph):
+#
+#     # check obstacle free
+#     obs_check = subtree.obs_check(near_v, x_new, label, 'reg')
+#
+#     # iterate over each buchi state
+#     for b_state in buchi_graph.nodes:
+#
+#         # new product state
+#         q_new = (x_new, b_state)
+#
+#         # extend
+#         added = subtree.extend(q_new, near_v, label, obs_check)
+#         # rewire
+#         if added == 1:
+#             subtree.rewire(q_new, near_v, obs_check)
+#
+#     # number of nodes
+#     # sz.append(tree.tree.number_of_nodes())
 
 
 def construction_tree(subtree, buchi_graph, centers, h_task, flag, connect):
