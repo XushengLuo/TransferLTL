@@ -16,3 +16,6 @@ class State(object):
 
     def __str__(self):
         return '{0},{1}'.format(self.x, self.q)
+
+    def xq(self):
+        return self.x, self.q

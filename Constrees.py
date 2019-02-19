@@ -14,27 +14,24 @@ import math
 import numpy as np
 from collections import OrderedDict
 from shapely.geometry import Point, Polygon, LineString
-
+from datetime import datetime
 import random
 
 
 class tree(object):
     """ construction of prefix and suffix tree
     """
-    def __init__(self, acpt, ts, buchi_graph, init, seg, step_size, no):
+    def __init__(self, ts, buchi_graph, init, step_size, no):
         """
-        :param acpt:  accepting state
         :param ts: transition system
         :param buchi_graph:  Buchi graph
         :param init: product initial state
         """
         self.robot = 1
-        self.acpt = acpt
         self.goals = []
         self.ts = ts
         self.buchi_graph = buchi_graph
         self.init = init
-        self.seg = seg
         self.step_size = step_size
         self.dim = len(self.ts['workspace'])
         uni_v = np.power(np.pi, self.robot*self.dim/2) / math.gamma(self.robot*self.dim/2+1)
@@ -51,7 +48,7 @@ class tree(object):
         self.search_goal(init, label, acc)
         # region that has ! preceding it
         self.no = no
-
+        # already used skilles
         self.used = set()
 
     def sample(self):
@@ -97,18 +94,19 @@ class tree(object):
             return tuple(np.asarray(x_nearest) + self.step_size *
                          (np.subtract(x_rand, x_nearest))/np.linalg.norm(np.subtract(x_rand, x_nearest)))
 
-    def acpt_check(self, q_min, q_new, label_new):
+    def acpt_check(self, q_min, q_new):
         """
         check the accepting state in the patg leading to q_new
         :param q_min:
         :param q_new:
-        :param label_new:
         :return:
         """
+        changed = False
         acc = self.tree.nodes[q_min]['acc'][:]  # copy
         if 'accept' in q_new[1]:
             acc.append(q_new)
-        return acc
+            changed = True
+        return acc, changed
 
     def search_goal(self, q_new, label_new, acc):
         """
@@ -119,16 +117,12 @@ class tree(object):
         :return:
         """
         for ac in acc:
-            # connect to path leading to accepting state
+            # connect to path leading to accepting state, including accepting state
             path = self.findpath([ac])[0][1]
             for point in path:
-                if list(self.obs_check([q_new], point[0], self.tree.nodes[point]['label'], 'reg').values())[0] \
+                if list(self.obs_check([q_new], point[0], self.tree.nodes[point]['label']).values())[0] \
                         and self.checkTranB(q_new[1], label_new, point[1]):
                     self.goals.append((q_new, point, ac))  # endpoint, middle point, accepting point
-            # connect to accepting state
-            if list(self.obs_check([q_new], ac[0], self.tree.nodes[ac]['label'], 'reg').values())[0] \
-                    and self.checkTranB(q_new[1], label_new, ac[1]):
-                self.goals.append((q_new, ac, ac))
 
     def extend(self, q_new, near_v, label, obs_check):
         """
@@ -151,25 +145,9 @@ class tree(object):
                     cost = c
         if added == 1:
             self.tree.add_node(q_new, cost=cost, label=label)
-            self.tree.nodes[q_new]['acc'] = self.acpt_check(q_min, q_new, label)
+            self.tree.nodes[q_new]['acc'] = self.acpt_check(q_min, q_new)[0]
             self.tree.add_edge(q_min, q_new)
-            self.search_goal(q_new, label, self.tree.nodes[q_new]['acc'])
-            # if self.seg == 'pre' and q_new[1] in self.acpt:
-            #     q_n = list(list(self.tree.pred[q_new].keys())[0])
-            #     cost = self.tree.nodes[tuple(q_n)]['cost']
-            #     label = self.tree.nodes[tuple(q_n)]['label']
-            #     q_n[1] = q_new[1]
-            #     q_n = tuple(q_n)
-            #     self.tree.add_node(q_n, cost=cost, label=label)
-            #     self.tree.add_edge(q_min, q_n)
-            #     self.goals.append(q_n)
-
-            # if self.seg == 'suf' and self.checkTranB(q_new[1], label, self.init[1]):
-            #     print('final')
-
-            # if self.seg == 'suf' and self.obs_check([self.init], q_new[0], label, 'final')[(q_new[0], self.init[0])]
-            #  and self.checkTranB(q_new[1], label, self.init[1]):
-            #     self.goals.append(q_new)
+            # self.search_goal(q_new, label, self.tree.nodes[q_new]['acc'])
         return added
 
     def rewire(self, q_new, near_v, obs_check):
@@ -188,17 +166,16 @@ class tree(object):
                 # update the cost of node in the subtree rooted at near_vertex
                 if delta_c > 0:
                     # self.tree.nodes[near_vertex]['cost'] = c
-                    if not list(self.tree.pred[near_vertex].keys()):
-                        print('empty')
                     self.tree.remove_edge(list(self.tree.pred[near_vertex].keys())[0], near_vertex)
                     self.tree.add_edge(q_new, near_vertex)
                     edges = dfs_labeled_edges(self.tree, source=near_vertex)
-                    self.tree.nodes[near_vertex]['acc'] = self.acpt_check(q_new, near_vertex,
-                                                            self.tree.nodes[near_vertex]['label'])
-                    for _, v, d in edges:
+                    acc, changed = self.acpt_check(q_new, near_vertex)
+                    self.tree.nodes[near_vertex]['acc'] = acc
+                    for u, v, d in edges:
                         if d == 'forward':
                             self.tree.nodes[v]['cost'] = self.tree.nodes[v]['cost'] - delta_c
-                            self.tree.nodes[v]['acc'] = self.tree.nodes[near_vertex]['acc'][:]  # copy
+                            if changed:
+                                self.tree.nodes[v]['acc'] = self.acpt_check(u, v)[0]  # copy
         # better to research the goal but abandon the implementation
 
     def near(self, x_new):
@@ -210,12 +187,13 @@ class tree(object):
         p_near = []
         r = min(self.gamma * np.power(np.log(self.tree.number_of_nodes()+1)/self.tree.number_of_nodes(),
                                       1./(self.dim*self.robot)), self.step_size)
+        # r = self.step_size
         for vertex in self.tree.nodes:
             if np.linalg.norm(np.subtract(x_new, vertex[0])) <= r:
                 p_near.append(vertex)
         return p_near
 
-    def obs_check(self, q_near, x_new, label, stage):
+    def obs_check(self, q_near, x_new, label):
         """
         check whether obstacle free along the line from x_near to x_new
         :param q_near: states in the near ball, tuple (mulp, buchi)
@@ -244,9 +222,9 @@ class tree(object):
                 if LineString([Point(x[0]), Point(x_new)]).intersects(boundary) \
                         and region + '_' + str(1) != label \
                         and region + '_' + str(1) != self.tree.nodes[x]['label']:
-                    if stage == 'reg' or (stage == 'final' and region in self.no):
-                        obs_check_dict[(x_new, x[0])] = False
-                        break
+                    # if stage == 'reg' or (stage == 'final' and region in self.no):
+                    obs_check_dict[(x_new, x[0])] = False
+                    break
 
         return obs_check_dict
 
@@ -351,9 +329,9 @@ class tree(object):
 #     # sz.append(tree.tree.number_of_nodes())
 
 
-def construction_tree(subtree, buchi_graph, centers, h_task, flag, connect):
-    # sample
-    x_rand = subtree.sample()
+def construction_tree(subtree, x_rand, buchi_graph, centers, h_task, flag, connect):
+    # # sample
+    # x_rand = subtree.sample()
     # nearest
     q_nearest = subtree.nearest(x_rand)
     # steer
@@ -373,10 +351,10 @@ def construction_tree(subtree, buchi_graph, centers, h_task, flag, connect):
     # extend and rewire
 
     # check obstacle free
-    obs_check = subtree.obs_check(near_v, x_new, label, 'reg')
+    obs_check = subtree.obs_check(near_v, x_new, label)
 
     # iterate over each buchi state
-    for b_state in buchi_graph.nodes:
+    for b_state in buchi_graph.nodes():
 
         # new product state
         q_new = (x_new, b_state)
@@ -402,74 +380,98 @@ def construction_tree_connect_root(subtree, q_new, label, centers, h_task, conne
     for sc in h_task.succ[curr]:
         if sc == curr:
             continue
-        succ = (sc.x, sc.q)
+        succ = sc.xq()
         # label of succ
         label_succ = None
         for l, coord in centers.items():
             if coord == succ[0]:
                 label_succ = l + '_' + str(1)
                 break
-        # in the tree
-        if succ in subtree.tree.nodes:
-            if subtree.obs_check([q_new], succ[0], label_succ, 'reg') and subtree.checkTranB(q_new[1], label, succ[1]):
-                c = subtree.tree.nodes[q_new]['cost'] + \
+        # connect q_new to succ
+        if list(subtree.obs_check([q_new], succ[0], label_succ).values())[0] and subtree.checkTranB(q_new[1], label, succ[1]):
+            c = subtree.tree.nodes[q_new]['cost'] + \
                             np.linalg.norm(np.subtract(q_new[0], succ[0]))
+            # in the tree
+            if succ in subtree.tree.nodes:
                 delta_c = subtree.tree.nodes[succ]['cost'] - c
                 # update the cost of node in the subtree rooted at near_vertex
                 if delta_c > 0:
                     subtree.tree.remove_edge(list(subtree.tree.pred[succ].keys())[0], succ)
+                    subtree.tree.nodes[succ]['acc'] = subtree.acpt_check(q_new, succ)[0]
                     subtree.tree.add_edge(q_new, succ)
 
-        # not in the tree
-        else:
-            if subtree.obs_check([q_new], succ[0], label_succ, 'reg') and subtree.checkTranB(q_new[1], label, succ[1]):
-                c = subtree.tree.nodes[q_new]['cost'] + \
-                            np.linalg.norm(np.subtract(q_new[0], succ[0]))
-
-                subtree.tree.add_node(succ, cost=c, label=label_succ, acc=subtree.acpt_check(q_new, succ, label_succ))
+            # not in the tree
+            else:
+                subtree.tree.add_node(succ, cost=c, label=label_succ, acc=subtree.acpt_check(q_new, succ)[0])
                 subtree.tree.add_edge(q_new, succ)
                 # keep track of connection
                 connect.add((curr, sc))
 
 
-def multi_trees(h_task, buchi_graph, ts, no, centers, n_max):
+def multi_trees(h_task, buchi_graph, ts, no, centers, max_node):
     multi_tree = list()
     # a list of subtrees
-    for root in h_task.nodes:
+    for root in h_task.nodes():
         if 'accept' not in root.q:
-            init = (root.x, root.q)
-            multi_tree.append(tree('', ts, buchi_graph, init, 'pre', 0.25, no))
-    # for t in multi_tree:
-    #     print(t.tree.nodes[t.tree.graph['init']]['label'])
-    # print('--------------prefix path---------------------')
-    n_max = n_max
+            init = root.xq()
+            multi_tree.append(tree(ts, buchi_graph, init, 0.25, no))
+    # =====================================================================================
+    # n_max = n_max
+    # c = 0
+    # connect = set()
+    # # for n in range(n_max):
+    # now = datetime.now()
+    # while np.sum([t.tree.number_of_nodes() for t in multi_tree]) < max_node:
+    #     # print(n)
+    #     i = random.randint(0, len(multi_tree)-1)
+    #     # sample
+    #     x_rand = multi_tree[i].sample()
+    #     # if n <= c * n_max:
+    #     # construction_tree(multi_tree[i], x_rand, buchi_graph, centers, h_task, 0, connect)
+    #     # else:
+    #     construction_tree(multi_tree[i], x_rand, buchi_graph, centers, h_task, 1, connect)
+    #
+    # end2path = dict()
+    # for pair in connect:
+    #     for t in range(len(multi_tree)):
+    #         if multi_tree[t].tree.graph['init'] == (pair[0].x, pair[0].q):
+    #             end2path[pair] = multi_tree[t].findpath([(pair[1].x, pair[1].q)])[0][1]
+    #             break
+    # num_path_seq = len(end2path.keys())
+    # time1 = (datetime.now() - now).total_seconds()
+    #
+    # # option 2 parallel
+    # multi_tree = list()
+    # # a list of subtrees
+    # for root in h_task.nodes:
+    #     if 'accept' not in root.q:
+    #         init = (root.x, root.q)
+    #         multi_tree.append(tree(ts, buchi_graph, init, 0.25, no))
+    #
+    # # ====================================================================================
     c = 0
     connect = set()
-    for n in range(n_max):
+    # for n in range(n_max):
+    now = datetime.now()
+    while np.sum([t.tree.number_of_nodes() for t in multi_tree]) < max_node:
         # print(n)
-        i = random.randint(0, len(multi_tree)-1)
-        if n <= c * n_max:
-            construction_tree(multi_tree[i], buchi_graph, centers, h_task, 0, connect)
-        else:
-            construction_tree(multi_tree[i], buchi_graph, centers, h_task, 1, connect)
+        x_rand = multi_tree[0].sample()
+
+        for i in range(len(multi_tree)):
+            # if n <= c * n_max:
+            if np.sum([t.tree.number_of_nodes() for t in multi_tree]) < c * max_node:  # 0 is better
+                construction_tree(multi_tree[i], x_rand, buchi_graph, centers, h_task, 0, connect)
+            else:
+                construction_tree(multi_tree[i], x_rand, buchi_graph, centers, h_task, 1, connect)
 
     end2path = dict()
     for pair in connect:
         for t in range(len(multi_tree)):
-            if multi_tree[t].tree.graph['init'] == (pair[0].x, pair[0].q):
-                end2path[pair] = multi_tree[t].findpath([(pair[1].x, pair[1].q)])[0][1]
+            if multi_tree[t].tree.graph['init'] == pair[0].xq():
+                end2path[pair] = multi_tree[t].findpath([pair[1].xq()])[0][1]
                 break
 
+    time2 = (datetime.now() - now).total_seconds()
+    print(time2, h_task.number_of_edges(), len(end2path.keys()))
+    # print(time1, time2, num_path_seq, num_path_par)
     return end2path
-    # for key, value in end2path.items():
-    #     print(key[0], key[1])
-    #     print(value)
-
-    # path = multi_tree[0].findpath([((),)])[0][1]
-    # x = []
-    # y = []
-    # for point in path:
-    #     x.append(point[0][0])
-    #     y.append(point[0][1])
-    # import matplotlib.pyplot as plt
-    # plt.plot(x, y)

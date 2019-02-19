@@ -57,8 +57,6 @@ def hoftask_no_simplified(init, buchi_graph, regions):
                             open_set.append(cand)
 
         explore_set.append(curr)
-    # for x in h_task.nodes:
-    #     print(x)
     return h_task
 
 
@@ -69,12 +67,27 @@ def inclusion(subtask_lib, subtask_new):
     :param subtask_new:
     :return:
     """
-    # if subtask_new[0].q == 'T2_S3':
-    #     print('hi')
+
     # if Equivalent(subtask_lib[0].label, subtask_new[0].label):
     #     print(subtask_lib[0].label, subtask_new[0].label)
     # A included in B <=> does no exist a truth assignment such that  (A & not B) is true
     if not satisfiable(And(subtask_lib[0].label, Not(subtask_new[0].label))):
+        if subtask_lib[0].x == subtask_new[0].x and subtask_lib[1].x == subtask_new[1].x:
+            return 'forward'
+        elif subtask_lib[0].x == subtask_new[1].x and subtask_lib[1].x == subtask_new[0].x:
+            return 'backward'
+
+    return ''
+
+
+def match(subtask_lib, subtask_new):
+    """
+    whether subtask_lib equals subtask_new
+    :param subtask_lib:
+    :param subtask_new:
+    :return:
+    """
+    if Equivalent(subtask_lib[0].label, subtask_new[0].label):
         if subtask_lib[0].x == subtask_new[0].x and subtask_lib[1].x == subtask_new[1].x:
             return 'forward'
         elif subtask_lib[0].x == subtask_new[1].x and subtask_lib[1].x == subtask_new[0].x:
@@ -99,11 +112,11 @@ def replace(init_q, end_q, init_lib_q, end_lib_q, path, direction):
     assert end_lib_q == path[-1][1], 'match error'
 
     repath = []
-    if direction == 'f':
+    if direction == 'forward':
         for point in path[:-1]:
             repath.append((point[0], init_q))
         repath.append((path[-1][0], end_q))
-    elif direction == 'b':
+    elif direction == 'backward':
         # reverse
         # initial state
         p = path[::-1]
@@ -117,6 +130,29 @@ def replace(init_q, end_q, init_lib_q, end_lib_q, path, direction):
     return repath
 
 
+def to_do(todo, newsubtask2subtask, subtask_new):
+    """
+    build a set of roots for the remaining tasks
+    :param todo:
+    :param newsubtask2subtask
+    :param subtask_new:
+    :return:
+    """
+    added = False
+    for subtask in todo:
+        mtch = match(subtask, subtask_new)
+        if mtch == 'forward':
+            newsubtask2subtask[(subtask[0].xq(), subtask[1].xq())] \
+                = (subtask_new[0].xq(), subtask_new[1].xq(), 'forward')
+            added = True
+        elif mtch == 'backward':
+            newsubtask2subtask[(subtask[0].xq(), subtask[1].xq())] \
+                = (subtask_new[0].xq(), subtask_new[1].xq(), 'backward')
+            added = True
+    if not added:
+        todo.add(subtask_new)
+
+
 def detect_reuse(h_task_lib, h_task_new, end2path):
     """
     detect resuable subtask
@@ -126,22 +162,31 @@ def detect_reuse(h_task_lib, h_task_new, end2path):
     :return:
     """
     subtask2path = dict()
+    todo = set()
+    newsubtask2subtask = dict()
+
     # each edge in new h_task
     for subtask_new in h_task_new.edges:
         # match edges in library of h_task
+        reused = False
         for subtask_lib in h_task_lib.edges:
             # future work: it's better to compare the lib of controller
             if subtask_lib not in end2path.keys():
                 continue
             direction = inclusion(subtask_lib, subtask_new)
             if direction == 'forward':
-                subtask2path[((subtask_new[0].x, subtask_new[0].q), (subtask_new[1].x, subtask_new[1].q))] \
-                        = replace(subtask_new[0].q, subtask_new[1].q, subtask_lib[0].q, subtask_lib[1].q, end2path[subtask_lib], 'f')
+                subtask2path[(subtask_new[0].xq(), subtask_new[1].xq())] \
+                        = replace(subtask_new[0].q, subtask_new[1].q, subtask_lib[0].q, subtask_lib[1].q, end2path[subtask_lib], 'forward')
+                reused = True
                 break
             elif direction == 'backward':
-                subtask2path[((subtask_new[0].x, subtask_new[0].q), (subtask_new[1].x, subtask_new[1].q))] \
-                    = replace(subtask_new[0].q, subtask_new[1].q, subtask_lib[0].q, subtask_lib[1].q, end2path[subtask_lib], 'b')
+                subtask2path[(subtask_new[0].xq(), subtask_new[1].xq())] \
+                    = replace(subtask_new[0].q, subtask_new[1].q, subtask_lib[0].q, subtask_lib[1].q, end2path[subtask_lib], 'backward')
+                reused = True
                 break
+        # find no matching subtasks
+        if not reused:
+            to_do(todo, newsubtask2subtask, subtask_new)
 
     # starting point : subtask starting from starting point
     starting2waypoint = {key[0]: [] for key, _ in subtask2path.items()}
@@ -151,4 +196,12 @@ def detect_reuse(h_task_lib, h_task_new, end2path):
     # for node in h_task_new.nodes:
     #     if 'accept' in node.q and (node.x, node.q) not in starting2waypoint.keys():
     #         starting2waypoint[(node.x, node.q)] = []
-    return subtask2path, starting2waypoint
+
+    todo_succ = {td[0].xq(): set() for td in todo}
+
+    for td in todo:
+        td_succ = list(h_task_new.succ[td[0]])
+        for t in todo:
+            if t[0] is not td[0] and t[0] in td_succ:
+                todo_succ[td[0].xq()].add(t[0].xq())
+    return subtask2path, starting2waypoint, todo, todo_succ, newsubtask2subtask,

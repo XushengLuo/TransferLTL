@@ -40,9 +40,7 @@ def match(h_task, curr, cand):
     :param cand: child node
     :return: yes if there exists the same subtask
     """
-    if curr.q == 'T0_S4':
-        print('')
-    for edge in h_task.edges:
+    for edge in h_task.edges():
         if (edge[0].x == curr.x and edge[1].x == cand.x) or (edge[1].x == curr.x and edge[0].x == cand.x) \
                 and Equivalent(edge[0].label, curr.label):
             return True
@@ -76,7 +74,7 @@ def hoftask(init, buchi_graph, regions):
             except KeyError:
                 # no self loop
                 label = to_dnf('0')
-            if q_b != curr.q: # and q_b not in buchi_graph.graph['accept']:
+            if q_b != curr.q:  # and q_b not in buchi_graph.graph['accept']:
                 # region corresponding to the label/word
                 edge_label = (buchi_graph.edges[(curr.q, q_b)]['label'])
                 if edge_label == '(1)':
