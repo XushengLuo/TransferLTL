@@ -20,13 +20,13 @@ from DetermineRoots import target
 
 
 def hoftask_no_simplified(init, buchi_graph, regions):
-    h_task = DiGraph(type='subtask')
     try:
         label = to_dnf(buchi_graph.edges[(buchi_graph.graph['init'][0], buchi_graph.graph['init'][0])]['label'], True)
     except KeyError:
         # no self loop
         label = to_dnf('0')
     init_node = State((init, buchi_graph.graph['init'][0]), label)
+    h_task = DiGraph(type='subtask', init=init_node)
     h_task.add_node(init_node)
     open_set = list()
     open_set.append(init_node)
@@ -127,6 +127,7 @@ def replace(init_q, end_q, init_lib_q, end_lib_q, path, direction):
                 repath.append((point[0], init_q))
         # end state
         repath.append((p[-1][0], end_q))
+        repath.insert(-1, (p[-1][0], init_q))  # backward need a immediate point before endpoint
     return repath
 
 
@@ -141,13 +142,13 @@ def to_do(todo, newsubtask2subtask, subtask_new):
     added = False
     for subtask in todo:
         mtch = match(subtask, subtask_new)
-        if mtch == 'forward':
-            newsubtask2subtask[(subtask[0].xq(), subtask[1].xq())] \
-                = (subtask_new[0].xq(), subtask_new[1].xq(), 'forward')
-            added = True
-        elif mtch == 'backward':
-            newsubtask2subtask[(subtask[0].xq(), subtask[1].xq())] \
-                = (subtask_new[0].xq(), subtask_new[1].xq(), 'backward')
+        if mtch:
+            if (subtask[0].xq(), subtask[1].xq()) not in newsubtask2subtask.keys():
+                newsubtask2subtask[(subtask[0].xq(), subtask[1].xq())] \
+                    = [(subtask_new[0].xq(), subtask_new[1].xq(), mtch)]
+            else:
+                newsubtask2subtask[(subtask[0].xq(), subtask[1].xq())].append(
+                    (subtask_new[0].xq(), subtask_new[1].xq(), mtch))
             added = True
     if not added:
         todo.add(subtask_new)
@@ -176,12 +177,14 @@ def detect_reuse(h_task_lib, h_task_new, end2path):
             direction = inclusion(subtask_lib, subtask_new)
             if direction == 'forward':
                 subtask2path[(subtask_new[0].xq(), subtask_new[1].xq())] \
-                        = replace(subtask_new[0].q, subtask_new[1].q, subtask_lib[0].q, subtask_lib[1].q, end2path[subtask_lib], 'forward')
+                    = replace(subtask_new[0].q, subtask_new[1].q, subtask_lib[0].q, subtask_lib[1].q,
+                              end2path[subtask_lib], 'forward')
                 reused = True
                 break
             elif direction == 'backward':
                 subtask2path[(subtask_new[0].xq(), subtask_new[1].xq())] \
-                    = replace(subtask_new[0].q, subtask_new[1].q, subtask_lib[0].q, subtask_lib[1].q, end2path[subtask_lib], 'backward')
+                    = replace(subtask_new[0].q, subtask_new[1].q, subtask_lib[0].q, subtask_lib[1].q,
+                              end2path[subtask_lib], 'backward')
                 reused = True
                 break
         # find no matching subtasks
@@ -189,14 +192,16 @@ def detect_reuse(h_task_lib, h_task_new, end2path):
             to_do(todo, newsubtask2subtask, subtask_new)
 
     # starting point : subtask starting from starting point
-    starting2waypoint = {key[0]: [] for key, _ in subtask2path.items()}
+    starting2waypoint = {key[0]: set() for key, _ in subtask2path.items()}
     for key, _ in subtask2path.items():
-        starting2waypoint[key[0]].append(key)
+        starting2waypoint[key[0]].add(key)
     # including accepting state
-    # for node in h_task_new.nodes:
-    #     if 'accept' in node.q and (node.x, node.q) not in starting2waypoint.keys():
-    #         starting2waypoint[(node.x, node.q)] = []
+    acpt = set()
+    for node in h_task_new.nodes:
+        if 'accept' in node.q:
+            acpt.add(node.xq())
 
+    # successor root
     todo_succ = {td[0].xq(): set() for td in todo}
 
     for td in todo:
@@ -204,4 +209,13 @@ def detect_reuse(h_task_lib, h_task_new, end2path):
         for t in todo:
             if t[0] is not td[0] and t[0] in td_succ:
                 todo_succ[td[0].xq()].add(t[0].xq())
-    return subtask2path, starting2waypoint, todo, todo_succ, newsubtask2subtask,
+
+    init_node = h_task_new.graph['init']
+    if init_node.xq() not in todo_succ:
+        td_succ = list(h_task_new.succ[init_node])
+        for t in todo:
+            if t[0] is not init_node.xq() and t[0] in td_succ:
+                todo_succ[init_node.xq()].add(t[0].xq())
+        # endpoint
+        # todo_succ[td[0].xq()].add(td[1].xq())
+    return subtask2path, starting2waypoint, todo, todo_succ, newsubtask2subtask, acpt

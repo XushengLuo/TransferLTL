@@ -21,7 +21,7 @@ import random
 class tree(object):
     """ construction of prefix and suffix tree
     """
-    def __init__(self, ts, buchi_graph, init, step_size, no):
+    def __init__(self, ts, buchi_graph, init, step_size, base=1e3):
         """
         :param ts: transition system
         :param buchi_graph:  Buchi graph
@@ -41,15 +41,15 @@ class tree(object):
         if label != '':
             label = label + '_' + str(1)
         # accepting state before current node
-        acc = []
+        acc = set()
         if 'accept' in init[1]:
-            acc.append(init)
+            acc.add(init)
         self.tree.add_node(init, cost=0, label=label, acc=acc)
         self.search_goal(init, label, acc)
-        # region that has ! preceding it
-        self.no = no
+
         # already used skilles
         self.used = set()
+        self.base = base
 
     def sample(self):
         """
@@ -102,9 +102,10 @@ class tree(object):
         :return:
         """
         changed = False
-        acc = self.tree.nodes[q_min]['acc'][:]  # copy
+        acc = set(self.tree.nodes[q_min]['acc']) # copy
         if 'accept' in q_new[1]:
-            acc.append(q_new)
+            acc.add(q_new)
+            # print(acc)
             changed = True
         return acc, changed
 
@@ -124,17 +125,20 @@ class tree(object):
                         and self.checkTranB(q_new[1], label_new, point[1]):
                     self.goals.append((q_new, point, ac))  # endpoint, middle point, accepting point
 
-    def extend(self, q_new, near_v, label, obs_check):
+    def extend(self, q_new, near_v, label, obs_check, succ_list):
         """
         :param: q_new: new state form: tuple (mulp, buchi)
         :param: near_v: near state form: tuple (mulp, buchi)
         :param: obs_check: check obstacle free  form: dict { (mulp, mulp): True }
+        :param: succ: list of successor of the root
         :return: extending the tree
         """
         added = 0
         cost = np.inf
         q_min = ()
         for near_vertex in near_v:
+            if near_vertex in succ_list:
+                continue
             if q_new != near_vertex and obs_check[(q_new[0], near_vertex[0])] \
                     and self.checkTranB(near_vertex[1], self.tree.nodes[near_vertex]['label'], q_new[1]):
                 c = self.tree.nodes[near_vertex]['cost'] + \
@@ -145,7 +149,7 @@ class tree(object):
                     cost = c
         if added == 1:
             self.tree.add_node(q_new, cost=cost, label=label)
-            self.tree.nodes[q_new]['acc'] = self.acpt_check(q_min, q_new)[0]
+            self.tree.nodes[q_new]['acc'] = set(self.acpt_check(q_min, q_new)[0])
             self.tree.add_edge(q_min, q_new)
             # self.search_goal(q_new, label, self.tree.nodes[q_new]['acc'])
         return added
@@ -170,12 +174,12 @@ class tree(object):
                     self.tree.add_edge(q_new, near_vertex)
                     edges = dfs_labeled_edges(self.tree, source=near_vertex)
                     acc, changed = self.acpt_check(q_new, near_vertex)
-                    self.tree.nodes[near_vertex]['acc'] = acc
+                    self.tree.nodes[near_vertex]['acc'] = set(acc)
                     for u, v, d in edges:
                         if d == 'forward':
                             self.tree.nodes[v]['cost'] = self.tree.nodes[v]['cost'] - delta_c
                             if changed:
-                                self.tree.nodes[v]['acc'] = self.acpt_check(u, v)[0]  # copy
+                                self.tree.nodes[v]['acc'] = set(self.acpt_check(u, v)[0])  # copy
         # better to research the goal but abandon the implementation
 
     def near(self, x_new):
@@ -353,6 +357,13 @@ def construction_tree(subtree, x_rand, buchi_graph, centers, h_task, flag, conne
     # check obstacle free
     obs_check = subtree.obs_check(near_v, x_new, label)
 
+    # successor root of current root
+    curr = None
+    for v in h_task.nodes:
+        if v.x == subtree.init[0] and v.q == subtree.init[1]:
+            curr = v
+            break
+    succ = [sc.xq() for sc in h_task.succ[curr]]
     # iterate over each buchi state
     for b_state in buchi_graph.nodes():
 
@@ -360,7 +371,7 @@ def construction_tree(subtree, x_rand, buchi_graph, centers, h_task, flag, conne
         q_new = (x_new, b_state)
 
         # extend
-        added = subtree.extend(q_new, near_v, label, obs_check)
+        added = subtree.extend(q_new, near_v, label, obs_check, succ)
         # rewire
         if added:
             subtree.rewire(q_new, near_v, obs_check)
@@ -397,24 +408,23 @@ def construction_tree_connect_root(subtree, q_new, label, centers, h_task, conne
                 # update the cost of node in the subtree rooted at near_vertex
                 if delta_c > 0:
                     subtree.tree.remove_edge(list(subtree.tree.pred[succ].keys())[0], succ)
-                    subtree.tree.nodes[succ]['acc'] = subtree.acpt_check(q_new, succ)[0]
+                    subtree.tree.nodes[succ]['acc'] = set(subtree.acpt_check(q_new, succ)[0])
                     subtree.tree.add_edge(q_new, succ)
 
             # not in the tree
             else:
-                subtree.tree.add_node(succ, cost=c, label=label_succ, acc=subtree.acpt_check(q_new, succ)[0])
+                subtree.tree.add_node(succ, cost=c, label=label_succ, acc=set(subtree.acpt_check(q_new, succ)[0]))
                 subtree.tree.add_edge(q_new, succ)
                 # keep track of connection
                 connect.add((curr, sc))
 
 
-def multi_trees(h_task, buchi_graph, ts, no, centers, max_node):
+def multi_trees(h_task, buchi_graph, ts, centers, max_node):
     multi_tree = list()
     # a list of subtrees
     for root in h_task.nodes():
-        if 'accept' not in root.q:
-            init = root.xq()
-            multi_tree.append(tree(ts, buchi_graph, init, 0.25, no))
+        init = root.xq()
+        multi_tree.append(tree(ts, buchi_graph, init, 0.25))
     # =====================================================================================
     # n_max = n_max
     # c = 0
