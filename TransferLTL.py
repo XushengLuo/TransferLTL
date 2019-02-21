@@ -22,7 +22,7 @@ from TL_RRT_star import transfer
 from TransferPlanning import transfer_multi_trees
 from Visualization import path_plot
 
-# =========================================================================
+# # =========================================================================
 # start1 = datetime.datetime.now()
 #
 # workspace, regions, centers, obs, init_state, uni_cost, formula,\
@@ -44,7 +44,7 @@ from Visualization import path_plot
 # time1 = (datetime.datetime.now() - start1).total_seconds()
 #
 # start2 = datetime.datetime.now()
-# end2path = multi_trees(h_task_lib, buchi_graph, ts, centers, 7000)
+# end2path = multi_trees(h_task_lib, buchi_graph, ts, centers, 1000)
 # time2 = (datetime.datetime.now() - start2).total_seconds()
 #
 #
@@ -104,12 +104,29 @@ print('number of total subtasks  : %6d' % (h_task_new.number_of_edges()))
 print('ratio                     : %8.2f' % (len(subtask2path) / h_task_new.number_of_edges()))
 
 optpath = transfer_multi_trees(buchi_graph, (init_pos, buchi_graph.graph['init'][0]), todo_succ, ts, centers,
-                                2000, subtask2path, starting2waypoint, newsubtask2subtask_p, acpt)
+                                10000, subtask2path, starting2waypoint, newsubtask2subtask_p, acpt)
 time4_transfer = (datetime.datetime.now() - start4).total_seconds()
-
 
 if optpath:
     path_plot(optpath, regions, obs)
+
+# start4 = datetime.datetime.now()
+# paths_transfer, nn_tranfer = transfer(buchi_graph, ts, (init_pos, buchi_graph.graph['init'][0]), subtask2path,
+#                                           starting2waypoint, 200, False)
+# time4_transfer = (datetime.datetime.now() - start4).total_seconds()
+#
+# print(time4_transfer)
+# optpath_transfer = []
+# optcost_transfer = np.inf
+# if len(paths_transfer) > 0:
+#     for index in paths_transfer.keys():
+#         if optcost_transfer > paths_transfer[index][0]:
+#             optcost_transfer = paths_transfer[index][0]
+#             optpath_transfer = paths_transfer[index][1]
+#
+# if len(optpath_transfer) > 0:
+#     path_plot(optpath_transfer, regions, obs)
+#
 # The ratio varies as different number of iteration to build multitree are used
 # for key, value in subtask2path.items():
 #     print(key, value)

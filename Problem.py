@@ -148,7 +148,7 @@ class problemFormulation(object):
             # self.no = []
 
             # self.formula = '<> e1 && <> e2'
-            self.formula = '<> e1 && <> e2 && <> e3'  #  && <> e4 && <> e5 && <> e6'
+            self.formula = '<> e1 && <> e2'  #  && <> e3'  #  && <> e4 && <> e5 && <> e6'
 
             self.formula_comp = {1: '(l1_1)',
                                  2: '(l2_1)',
@@ -162,12 +162,11 @@ class problemFormulation(object):
 
         # ---------------------------- case 1 --------------------------------
         if case == 1:
-            # self.formula = '[]<> (e1 && <> (e2 && <> e3))'
+            # self.formula = ' [] (<> e1 && <> e2)'
             # self.formula_comp = {1: '(l1_1)',
             #                      2: '(l2_1)',
             #                      3: '(l5_1)'}
             # self.exclusion = [('e1', 'e2'), ('e1', 'e3'), ('e2', 'e3')]
-            # self.no = []
             # self.formula = '[] (<> e1 && <> e2 && <> e4 && <> e6)'
             #
             # self.formula_comp = {1: '(l1_1)',
@@ -195,14 +194,19 @@ class problemFormulation(object):
             # self.exclusion = [('e1', 'e2'), ('e1', 'e3'), ('e2', 'e3'), ('e1', 'e4'), ('e2', 'e4'), ('e3', 'e4'),
             #                   ('e1', 'e5'), ('e2', 'e5'), ('e3', 'e5'), ('e4', 'e5')]
             # self.no = []
-            self.formula = '[]<> (e1 && <> e2) && []<> (e3 && <> e4) && <> e5' #  && !e3 U e1' #  && !e3 U e1'!e5 U e1'
+            self.formula = '[]<> (e1 && <> e2) && []<> (e3 && <> e4) && <> e5  && <> e6 && !e3 U e1 && !e3 U e1 && !e5 U e1'
+            # self.formula = '<> e4 && []<> (e3  && <> e1) && (!e1 U e2)  && []!e5'
+            # self.formula = '[]<> e1 && <> e2 && <> e3 && <> e4'
+            # self.formula = '[] (<> e1 && <> e2 && <> e3 ) && <> e5 && !e1 U e2 && !e3 U e2 && !e5 U e1'
             self.formula_comp = {1: '(l1_1)',
                                  2: '(l2_1)',
                                  3: '(l3_1)',
                                  4: '(l4_1)',
-                                 5: '(l5_1)'}
+                                 5: '(l5_1)',
+                                 6: '(l6_1)'}
             self.exclusion = [('e1', 'e2'), ('e1', 'e3'), ('e2', 'e3'), ('e1', 'e4'), ('e2', 'e4'), ('e3', 'e4'),
-                              ('e1', 'e5'), ('e2', 'e5'), ('e3', 'e5'), ('e4', 'e5')]
+                              ('e1', 'e5'), ('e2', 'e5'), ('e3', 'e5'), ('e4', 'e5'), ('e1', 'e6'), ('e2', 'e6'),
+                              ('e3', 'e6'), ('e4', 'e6'), ('e5', 'e6')]
 
             # self.formula = '<> e1 && <> (e2  && <> (e3 && <> ( e4 && <> e5)))'
             #

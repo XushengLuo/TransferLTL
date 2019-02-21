@@ -137,7 +137,7 @@ class tree(object):
         cost = np.inf
         q_min = ()
         for near_vertex in near_v:
-            if near_vertex in succ_list:
+            if near_vertex in succ_list:  # do not extend if there is a corresponding root
                 continue
             if q_new != near_vertex and obs_check[(q_new[0], near_vertex[0])] \
                     and self.checkTranB(near_vertex[1], self.tree.nodes[near_vertex]['label'], q_new[1]):
@@ -268,6 +268,8 @@ class tree(object):
         truth = self.buchi_graph.edges[(b_state, q_b_new)]['truth']
         if self.t_satisfy_b_truth(x_label, truth):
             return True
+
+        return False
 
     def t_satisfy_b_truth(self, x_label, truth):
         """

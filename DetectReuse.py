@@ -212,10 +212,12 @@ def detect_reuse(h_task_lib, h_task_new, end2path):
 
     init_node = h_task_new.graph['init']
     if init_node.xq() not in todo_succ:
+        todo_succ[init_node.xq()] = set()
         td_succ = list(h_task_new.succ[init_node])
         for t in todo:
             if t[0] is not init_node.xq() and t[0] in td_succ:
                 todo_succ[init_node.xq()].add(t[0].xq())
+
         # endpoint
         # todo_succ[td[0].xq()].add(td[1].xq())
     return subtask2path, starting2waypoint, todo, todo_succ, newsubtask2subtask, acpt

@@ -137,12 +137,14 @@ def construction_tree(transfer_tree, buchi_graph, subtask2path, starting2waypoin
         q_new = (x_new, b_state)
 
         # extend
-        added = transfer_tree.extend(q_new, near_v, label, obs_check)
+        added = transfer_tree.extend(q_new, near_v, label, obs_check, [])
         
         # rewire
         if added:
             # if 'accept' in q_new[1]:
             #     transfer_tree.goals.append(q_new)
+            transfer_tree.search_goal(q_new, label, transfer_tree.tree.nodes[q_new]['acc'])
+
             transfer_tree.rewire(q_new, near_v, obs_check)
             # subpath that can be connected via q_new
             if uniform and random.uniform(0, 1) <= 1:  # float(sys.argv[1]):
@@ -190,7 +192,7 @@ def construction_tree_connect_root(transfer_tree, sample_list):
                             transfer_tree.tree.nodes[v]['acc'] = transfer_tree.acpt_check(u, v)
 
 
-def transfer(buchi_graph, ts, no, init, subtask2path, starting2waypoint, n_max, uniform):
+def transfer(buchi_graph, ts, init, subtask2path, starting2waypoint, n_max, uniform):
     """
     build the tree for the new formula
     :param buchi_graph: 
@@ -203,7 +205,7 @@ def transfer(buchi_graph, ts, no, init, subtask2path, starting2waypoint, n_max, 
     :param uniform
     :return: 
     """
-    transfer_tree = tree(ts, buchi_graph, init, 0.25, no)
+    transfer_tree = tree(ts, buchi_graph, init, 0.25)
     # print('--------------prefix path---------------------')
     n_max = n_max
     # for n in range(n_max):
